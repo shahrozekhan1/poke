@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ETL Pipeline & Pokémon Filter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+    
+    * {
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    body {
+      background: #0a0e27;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    /* Animated gradient background */
+    .gradient-bg {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      background: linear-gradient(-45deg, #0a0e27, #1a1f3a, #2d1b4e, #1e3a5f);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      z-index: 0;
+    }
+    
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    /* Floating particles */
+    .particle {
+      position: fixed;
+      width: 4px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      animation: float-particle 20s infinite ease-in-out;
+    }
+    
+    @keyframes float-particle {
+      0%, 100% {
+        transform: translateY(0) translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100vh) translateX(50px);
+        opacity: 0;
+      }
+    }
+    
+    /* Glass card effect */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Neon glow button */
+    .neon-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      background-size: 200% 200%;
+      animation: gradient-flow 3s ease infinite;
+      box-shadow: 0 0 20px rgba(102, 126, 234, 0.5),
+                  0 0 40px rgba(118, 75, 162, 0.3),
+                  0 0 60px rgba(240, 147, 251, 0.2);
+      transition: all 0.3s ease;
+      border: none;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .neon-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s;
+    }
+    
+    .neon-btn:hover::before {
+      left: 100%;
+    }
+    
+    .neon-btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 0 30px rgba(102, 126, 234, 0.8),
+                  0 0 60px rgba(118, 75, 162, 0.5),
+                  0 0 90px rgba(240, 147, 251, 0.3);
+    }
+    
+    @keyframes gradient-flow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    /* Title glow effect */
+    .glow-text {
+      text-shadow: 0 0 10px rgba(102, 126, 234, 0.8),
+                   0 0 20px rgba(102, 126, 234, 0.6),
+                   0 0 30px rgba(102, 126, 234, 0.4),
+                   0 0 40px rgba(118, 75, 162, 0.3);
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% {
+        text-shadow: 0 0 10px rgba(102, 126, 234, 0.8),
+                     0 0 20px rgba(102, 126, 234, 0.6),
+                     0 0 30px rgba(102, 126, 234, 0.4);
+      }
+      50% {
+        text-shadow: 0 0 20px rgba(102, 126, 234, 1),
+                     0 0 30px rgba(102, 126, 234, 0.8),
+                     0 0 40px rgba(102, 126, 234, 0.6),
+                     0 0 50px rgba(118, 75, 162, 0.4);
+      }
+    }
+    
+    /* Pokemon card animation */
+    .pokemon-item {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      border: 1px solid rgba(102, 126, 234, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .pokemon-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .pokemon-item:hover {
+      transform: translateX(10px) scale(1.02);
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+      border-color: rgba(102, 126, 234, 0.6);
+      box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .pokemon-item:hover::before {
+      left: 100%;
+    }
+    
+    /* Input styling */
+    .modern-input {
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(102, 126, 234, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .modern-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(102, 126, 234, 0.8);
+      box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    /* Fade in animation */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+    
+    /* Spinner */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .spinner {
+      animation: spin 1s linear infinite;
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #764ba2 0%, #f093fb 100%);
+    }
+    
+    /* Badge pulse */
+    .badge-pulse {
+      animation: badge-pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes badge-pulse {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(240, 147, 251, 0.7);
+      }
+      50% {
+        box-shadow: 0 0 0 10px rgba(240, 147, 251, 0);
+      }
+    }
+  </style>
+</head>
+<body class="text-white min-h-screen p-6 flex items-center justify-center">
+  
+  <!-- Animated background -->
+  <div class="gradient-bg"></div>
+  
+  <!-- Floating particles -->
+  <div class="particle" style="left: 10%; animation-delay: 0s; animation-duration: 15s;"></div>
+  <div class="particle" style="left: 20%; animation-delay: 2s; animation-duration: 18s;"></div>
+  <div class="particle" style="left: 30%; animation-delay: 4s; animation-duration: 20s;"></div>
+  <div class="particle" style="left: 40%; animation-delay: 1s; animation-duration: 22s;"></div>
+  <div class="particle" style="left: 50%; animation-delay: 3s; animation-duration: 17s;"></div>
+  <div class="particle" style="left: 60%; animation-delay: 5s; animation-duration: 19s;"></div>
+  <div class="particle" style="left: 70%; animation-delay: 2.5s; animation-duration: 21s;"></div>
+  <div class="particle" style="left: 80%; animation-delay: 4.5s; animation-duration: 16s;"></div>
+  <div class="particle" style="left: 90%; animation-delay: 1.5s; animation-duration: 23s;"></div>
+
+  <!-- Main Container -->
+  <div class="relative z-10 w-full max-w-5xl">
+    
+    <!-- Header -->
+    <div class="text-center mb-12 fade-in-up">
+      <div class="inline-block mb-4">
+        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg" style="box-shadow: 0 0 40px rgba(147, 51, 234, 0.5);">
+          <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M13 7H7v6h6V7z"/>
+            <path fill-rule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+      </div>
+      <h1 class="text-6xl font-bold mb-3 glow-text">Pokémon ETL Pipeline</h1>
+      <p class="text-xl text-purple-300">Extract • Transform • Load</p>
+    </div>
+
+    <!-- Run Pipeline Button -->
+    <div class="flex justify-center mb-10 fade-in-up" style="animation-delay: 0.2s;">
+      <button id="run-btn" class="neon-btn text-white font-bold py-5 px-12 rounded-2xl text-lg relative">
+        <span class="relative z-10 flex items-center gap-3">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          Run Pipeline
+        </span>
+      </button>
+    </div>
+
+    <!-- Status Box -->
+    <div id="response-box" class="glass-card p-8 rounded-3xl mb-8 min-h-[120px] flex items-center justify-center fade-in-up" style="animation-delay: 0.3s;">
+      <div class="text-center">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <p class="text-xl text-gray-300">Ready to process your data</p>
+      </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div id="filters" class="hidden glass-card p-8 rounded-3xl mb-8 fade-in-up">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-3xl font-bold flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          Filter Options
+        </h2>
+        <div id="count-badge" class="badge-pulse px-6 py-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-sm shadow-lg">
+          0 Results
+        </div>
+      </div>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div>
+          <label class="block mb-3 text-sm font-semibold text-purple-300 uppercase tracking-wide">Type</label>
+          <input type="text" id="type" placeholder="water, fire, grass..." 
+            class="modern-input w-full px-5 py-3 rounded-xl text-white placeholder-gray-500">
+        </div>
+        <div>
+          <label class="block mb-3 text-sm font-semibold text-purple-300 uppercase tracking-wide">Min HP</label>
+          <input type="number" id="hp-min" min="0" placeholder="50" 
+            class="modern-input w-full px-5 py-3 rounded-xl text-white placeholder-gray-500">
+        </div>
+        <div>
+          <label class="block mb-3 text-sm font-semibold text-purple-300 uppercase tracking-wide">Min Attack</label>
+          <input type="number" id="attack-min" min="0" placeholder="70" 
+            class="modern-input w-full px-5 py-3 rounded-xl text-white placeholder-gray-500">
+        </div>
+        <div class="flex items-end">
+          <label class="flex items-center gap-3 cursor-pointer w-full px-5 py-3 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-2 border-purple-500/30 hover:border-purple-500/60 transition-all">
+            <input type="checkbox" id="is-evolved" class="w-5 h-5 rounded accent-purple-500">
+            <span class="font-semibold">Evolved Only</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pokémon List -->
+    <div id="pokemon-container" class="hidden glass-card p-8 rounded-3xl fade-in-up">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold">Your Pokémon</h3>
+      </div>
+      <div id="pokemon-list" class="space-y-3 max-h-96 overflow-auto pr-3"></div>
+    </div>
+
+  </div>
+
+  <script>
+    const runBtn = document.getElementById('run-btn');
+    const responseBox = document.getElementById('response-box');
+    const pokemonList = document.getElementById('pokemon-list');
+    const pokemonContainer = document.getElementById('pokemon-container');
+    const filtersDiv = document.getElementById('filters');
+    const countBadge = document.getElementById('count-badge');
+
+    runBtn.addEventListener('click', async () => {
+      runBtn.disabled = true;
+      runBtn.innerHTML = `
+        <span class="relative z-10 flex items-center gap-3">
+          <svg class="w-6 h-6 spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Processing...
+        </span>
+      `;
+      
+      responseBox.innerHTML = `
+        <div class="text-center">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
+            <svg class="w-8 h-8 text-white spinner" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+          </div>
+          <p class="text-xl text-yellow-300">Running ETL Pipeline...</p>
+        </div>
+      `;
+      
+      pokemonContainer.classList.add('hidden');
+      filtersDiv.classList.add('hidden');
+      pokemonList.innerHTML = '';
+
+      try {
+        const resp = await fetch('/etl/run-pipeline', { method: 'POST' });
+        const data = await resp.json();
+        
+        if (resp.ok) {
+          responseBox.innerHTML = `
+            <div class="text-center">
+              <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center" style="box-shadow: 0 0 30px rgba(34, 197, 94, 0.5);">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <p class="text-xl text-green-300 font-semibold">${data.detail || 'Pipeline completed successfully!'}</p>
+            </div>
+          `;
+          filtersDiv.classList.remove('hidden');
+          await loadFilteredPokemon();
+        } else {
+          responseBox.innerHTML = `
+            <div class="text-center">
+              <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </div>
+              <p class="text-xl text-red-300">${data.detail || 'Pipeline failed'}</p>
+            </div>
+          `;
+        }
+      } catch (err) {
+        responseBox.innerHTML = `
+          <div class="text-center">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <p class="text-xl text-red-300">Error: ${err.message}</p>
+          </div>
+        `;
+      } finally {
+        runBtn.disabled = false;
+        runBtn.innerHTML = `
+          <span class="relative z-10 flex items-center gap-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            Run Pipeline
+          </span>
+        `;
+      }
+    });
+
+    async function loadFilteredPokemon() {
+      const params = new URLSearchParams();
+      const type = document.getElementById('type').value.trim();
+      const hpMin = document.getElementById('hp-min').value;
+      const attackMin = document.getElementById('attack-min').value;
+      const isEvolved = document.getElementById('is-evolved').checked;
+
+      if (type) params.append('type_name', type);
+      if (hpMin) params.append('hp_min', hpMin);
+      if (attackMin) params.append('attack_min', attackMin);
+      if (isEvolved) params.append('is_evolved', true);
+
+      try {
+        const resp = await fetch(`/pokemon/filter?${params.toString()}`);
+        const pokemons = await resp.json();
+
+        pokemonList.innerHTML = '';
+        countBadge.textContent = `${pokemons.length} Result${pokemons.length !== 1 ? 's' : ''}`;
+        
+        if (pokemons.length === 0) {
+          pokemonList.innerHTML = `
+            <div class="text-center py-12">
+              <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center">
+                <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <p class="text-xl text-gray-400">No Pokémon match your filters</p>
+            </div>
+          `;
+        } else {
+          pokemons.forEach((name, idx) => {
+            const li = document.createElement('div');
+            li.className = "pokemon-item py-4 px-6 rounded-2xl flex items-center gap-4";
+            li.style.animationDelay = `${idx * 0.03}s`;
+            li.classList.add('fade-in-up');
+            li.innerHTML = `
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                ${idx + 1}
+              </div>
+              <span class="text-lg font-semibold">${name}</span>
+            `;
+            pokemonList.appendChild(li);
+          });
+        }
+
+        pokemonContainer.classList.remove('hidden');
+      } catch (err) {
+        responseBox.innerHTML = `
+          <div class="text-center">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <p class="text-xl text-red-300">Error loading Pokémon: ${err.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    ['type', 'hp-min', 'attack-min', 'is-evolved'].forEach(id => {
+      document.getElementById(id).addEventListener('input', loadFilteredPokemon);
+      document.getElementById(id).addEventListener('change', loadFilteredPokemon);
+    });
+  </script>
+
+</body>
+</html>
