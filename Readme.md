@@ -399,12 +399,5 @@ Integrating **AI and Machine Learning** models could unlock new capabilities suc
 * Natural language query support in API
 
 ---
-
-## 🪪 License
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
-
----
-
 **Made with ❤️ for Pokémon fans and data engineers**
 *Powered by [PokéAPI](https://pokeapi.co/) • [FastAPI](https://fastapi.tiangolo.com/) • [SQLite](https://www.sqlite.org/) • [Docker](https://www.docker.com/)*
