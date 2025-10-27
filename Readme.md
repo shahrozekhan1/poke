@@ -5,7 +5,6 @@ A comprehensive ETL pipeline that fetches Pokémon data from the PokéAPI, proce
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)
 ![SQLite](https://img.shields.io/badge/SQLite-3-lightgrey.svg)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ---
 
