@@ -21,8 +21,6 @@ The project highlights key engineering concepts such as:
 - Containerization using **Docker** for reproducible deployments  
 - Unit testing and modular architecture  
 
-This project is ideal for developers, data engineers, or learners who want to explore **real-world ETL pipelines**, **database design**, and **API integration** using **Python**, **FastAPI**, and **Docker**.
-
 ---
 
 > 📝 **Note:**  
